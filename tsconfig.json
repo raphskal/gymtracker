@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",  // Setzt die Basis für Aliase auf den src-Ordner
+    "paths": {
+      "@/*": ["./*"]     // Definiert den Alias @ für den src-Ordner
+    },
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target":"esnext",
+    "module":"esnext",
+  },
+  "include": [
+    "src/**/*",
+    "node_modules/@types/**/*"
+  ]
+}
