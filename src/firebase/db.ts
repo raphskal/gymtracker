@@ -35,36 +35,71 @@ const saveLift = async (liftData: {
 export { saveLift };
 
 // Fetch exercise suggestions
-export const fetchSuggestions = async (): Promise<string[]> => {
+export const fetchSuggestions = async (searchTerm: string = ""): Promise<string[]> => {
   const q = query(collection(db, "lifts"));
   const querySnapshot = await getDocs(q);
   const exercises: Set<string> = new Set();
+
   querySnapshot.forEach((doc) => {
-    exercises.add(doc.data().exercise);
+    const exercise = doc.data().exercise;
+    if (exercise.toLowerCase().includes(searchTerm.toLowerCase())) {
+      exercises.add(exercise);
+    }
   });
-  return Array.from(exercises);
+
+  return Array.from(exercises).slice(0, 5); // Limit to 5 results
+};
+
+// Fetch the last exercise used
+export const fetchLastExercise = async (): Promise<string> => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      const q = query(
+        collection(db, "lifts"),
+        where("uid", "==", user.uid),
+        orderBy("date", "desc"),
+        limit(1)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const lastLift = querySnapshot.docs[0].data();
+        return lastLift.exercise[0];
+      }
+      else {
+      return ""
+    }
+    }
+    else {
+      return ""
+    }
 };
 
 // Fetch the most recent workout for a given exercise
 export const fetchMostRecentWorkout = async (exercise: string) => {
-  const q = query(
-    collection(db, "lifts"),
-    where("exercise", "==", exercise),
-    orderBy("date", "desc"),
-    // limit(1)
-  );
-  const querySnapshot = await getDocs(q);
-  // Prüfe, ob Daten vorhanden sind
-  if (!querySnapshot.empty) {
-    const allSets = querySnapshot.docs.map(doc => doc.data());
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (user) {
+    const q = query(
+      collection(db, "lifts"),
+      where("exercise", "==", exercise),
+      where("uid", "==", user.uid),
+          orderBy("date", "desc"),
+      //limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const allSets = querySnapshot.docs.map(doc => doc.data());
 
-    // Finde das letzte Datum
-    const lastDate = allSets[0].date;
+      // Find the last date
+      const lastDate = allSets[0].date;
 
-    // Filtere alle Sets für dieses Datum
-    const setsForLastDate = allSets.filter(set => set.date === lastDate);
+      // Filter all sets for this date
+      const setsForLastDate = allSets.filter(set => set.date === lastDate);
 
-    return setsForLastDate;
+      return setsForLastDate;
+    }
+  else return []
   }
 
   return [];
@@ -94,4 +129,3 @@ export async function fetchUserExerciseData(uid: string, exercise: string) {
     return { date, oneRepMax };
   });
 }
-

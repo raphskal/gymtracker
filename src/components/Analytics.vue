@@ -1,17 +1,18 @@
 <template>
-  <div>
-      <!-- Burger Menu -->
-      <nav class="burger-menu">
-        <button @click="toggleMenu" class="burger-button">
-          ☰
-        </button>
-        <div v-if="isMenuOpen" class="menu-content">
-          <ul>
-            <li><a @click="navigateTo('/')">Home</a></li>
-            <li><a @click="navigateTo('/analytics')">Analytics</a></li>
-          </ul>
-        </div>
-      </nav>
+  <div class="dark-theme">
+    <!-- Burger Menu -->
+    <nav class="burger-menu">
+      <button @click="toggleMenu" class="burger-button">
+        ☰
+      </button>
+      <div v-if="isMenuOpen" class="menu-content">
+        <ul>
+          <li><a @click="navigateTo('/')">Home</a></li>
+          <li><a @click="navigateTo('/analytics')">Analytics</a></li>
+          <li><a @click="navigateTo('/lifts')">Lifts</a></li>
+        </ul>
+      </div>
+    </nav>
     <label for="exerciseSelect">Select Exercise:</label>
     <select id="exerciseSelect" v-model="selectedExercise" @change="updateGraph">
       <option v-for="exercise in exercises" :key="exercise" :value="exercise">
@@ -72,8 +73,8 @@ export default defineComponent({
             {
               label: `Estimated 1RM for ${selectedExercise.value}`,
               data: oneRepMaxData,
-              borderColor: "blue",
-              backgroundColor: "rgba(0, 0, 255, 0.1)",
+              borderColor: "#00ff00",
+              backgroundColor: "rgba(0, 255, 0, 0.1)",
             },
           ],
         },
@@ -85,10 +86,14 @@ export default defineComponent({
           scales: {
             x: {
               title: { display: true, text: "Date" },
+              grid: { color: "#444" },
+              ticks: { color: "#00ff00" },
             },
             y: {
               title: { display: true, text: "1RM (kg)" },
-              beginAtZero: true, // Ensures the y-axis starts at 0
+              beginAtZero: true,
+              grid: { color: "#444" },
+              ticks: { color: "#00ff00" },
             },
           },
         },
@@ -120,17 +125,18 @@ export default defineComponent({
       isMenuOpen.value = false; // Close the menu after navigation
     };
 
-    return { selectedExercise, 
-            exercises, 
-            updateGraph,
-            toggleMenu,
-            navigateTo,
-            isMenuOpen };
+    return { selectedExercise, exercises, updateGraph, toggleMenu, navigateTo, isMenuOpen };
   },
 });
 </script>
 
 <style scoped>
+.dark-theme {
+  background-color: #333;
+  color: #00ff00;
+  padding: 20px;
+}
+
 .burger-menu {
   position: relative;
 }
@@ -140,13 +146,14 @@ export default defineComponent({
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  color: #00ff00;
 }
 
 .menu-content {
   position: absolute;
   top: 2rem;
   left: 0;
-  background-color: white;
+  background-color: #444;
   border: 1px solid #ddd;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -164,12 +171,12 @@ export default defineComponent({
 
 .menu-content li a {
   text-decoration: none;
-  color: #333;
+  color: #00ff00;
   cursor: pointer;
 }
 
 .menu-content li a:hover {
-  color: #007bff;
+  color: #00cc00;
 }
 
 label {
@@ -178,6 +185,9 @@ label {
 
 select {
   margin-bottom: 20px;
+  background-color: #444;
+  color: #00ff00;
+  border: 1px solid #00ff00;
 }
 
 canvas {
