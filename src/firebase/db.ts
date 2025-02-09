@@ -1,5 +1,5 @@
 // src/firebase/db.ts
-import { getFirestore, addDoc, query, where, getDocs, collection, orderBy, limit } from "firebase/firestore";
+import { getFirestore, addDoc, query, where, getDocs, collection, orderBy, limit, startAt, endAt } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { app } from "./firebase";
 
@@ -35,20 +35,27 @@ const saveLift = async (liftData: {
 export { saveLift };
 
 // Fetch exercise suggestions
-export const fetchSuggestions = async (searchTerm: string = ""): Promise<string[]> => {
-  const q = query(collection(db, "lifts"));
+export const fetchSuggestions = async (searchTerm: string): Promise<string[]> => {
+  if (!searchTerm) return []; // Fetch only after the user starts typing
+
+  const q = query(
+    collection(db, "lifts"),
+    orderBy("exercise"), // Ensure Firestore allows ordering by this field
+    startAt(searchTerm),
+    endAt(searchTerm + "\uf8ff"), // Firestore trick to match words starting with searchTerm
+    limit(5) // Fetch only 5 results directly from Firestore
+  );
+
   const querySnapshot = await getDocs(q);
-  const exercises: Set<string> = new Set();
+  const exercises: string[] = [];
 
   querySnapshot.forEach((doc) => {
-    const exercise = doc.data().exercise;
-    if (exercise.toLowerCase().includes(searchTerm.toLowerCase())) {
-      exercises.add(exercise);
-    }
+    exercises.push(doc.data().exercise);
   });
 
-  return Array.from(exercises).slice(0, 5); // Limit to 5 results
+  return exercises;
 };
+
 
 // Fetch the last exercise used
 export const fetchLastExercise = async (): Promise<string> => {

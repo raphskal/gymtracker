@@ -9,6 +9,7 @@
         <ul>
           <li><a @click="navigateTo('/')">Home</a></li>
           <li><a @click="navigateTo('/analytics')">Analytics</a></li>
+          <li><a @click="navigateTo('/lifts')">Lifts</a></li>
         </ul>
       </div>
     </nav>
@@ -114,29 +115,22 @@ export default defineComponent({
       }
     };
 
-     const fetchSuggestionsForUser = async () => {
-      try {
-        suggestions.value = await fetchSuggestions(selectedExercise.value);
-      } catch (error) {
-        console.error('Error fetching suggestions:', error);
+    const fetchSuggestionsForUser = async () => {
+      if (selectedExercise.value.length > 0) { 
+        try {
+          suggestions.value = await fetchSuggestions(selectedExercise.value);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+        }
+      } else {
+        suggestions.value = []; // Clear suggestions if input is empty
       }
     };
 
-    // Fetch suggestions whenever the input changes
+    // Re-fetch suggestions dynamically as the user types
     watchEffect(() => {
-      if (selectedExercise.value.length > 0) {
-        fetchSuggestionsForUser();
-      }
+      fetchSuggestionsForUser();
     });
-
-    // Fetch the last exercise used
-    const fetchLastExerciseForUser = async () => {
-      try {
-         last.value = await fetchLastExercise();
-      } catch (error) {
-        console.error("Error fetching last exercise:", error);
-      }
-    };
 
     // Fetch all sets for the most recent day for a given exercise
     const fetchRecentWorkout = async () => {
